@@ -1,3 +1,4 @@
+# IAM Policy Document for Cluster
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
@@ -21,12 +22,12 @@ resource "aws_iam_role_policy_attachment" "example-AmazonEKSClusterPolicy" {
   role       = aws_iam_role.example.name
 }
 
-#get vpc data
+# Get VPC data
 data "aws_vpc" "default" {
   default = true
 }
 
-#get public subnets for cluster
+# Get public subnets for cluster
 data "aws_subnets" "public" {
   filter {
     name   = "vpc-id"
@@ -34,13 +35,13 @@ data "aws_subnets" "public" {
   }
 }
 
-#cluster provision
+# EKS Cluster Provision
 resource "aws_eks_cluster" "example" {
   name     = "EKS_CLOUD1"
   role_arn = aws_iam_role.example.arn
 
   vpc_config {
-   subnet_ids = [
+    subnet_ids = [
       data.aws_subnets.public.ids[0],  # us-east-1a
       data.aws_subnets.public.ids[1],  # us-east-1b
       data.aws_subnets.public.ids[2],  # us-east-1c
@@ -60,7 +61,7 @@ resource "aws_iam_role" "example1" {
   name = "eks-node-group-cloud2"
 
   assume_role_policy = jsonencode({
-    Statement = [ {
+    Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
       Principal = {
@@ -86,7 +87,7 @@ resource "aws_iam_role_policy_attachment" "example-AmazonEC2ContainerRegistryRea
   role       = aws_iam_role.example1.name
 }
 
-#create node group
+# Create Node Group
 resource "aws_eks_node_group" "example" {
   cluster_name    = aws_eks_cluster.example.name
   node_group_name = "Node-cloud"
